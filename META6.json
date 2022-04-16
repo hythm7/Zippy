@@ -1,0 +1,34 @@
+{
+  "auth": "github:hythm7",
+  "authors": [
+    "Haytham Elganiny"
+  ],
+  "build-depends": [
+  ],
+  "depends": [
+    "Pop"
+  ],
+  "description": "Zippy Game",
+  "license": "Artistic-2.0",
+  "name": "Zippy",
+  "perl": "6.d",
+  "provides": {
+    "Zippy": "lib/Zippy.rakumod",
+    "Zippy::Level": "lib/Zippy/Level.rakumod",
+    "Zippy::Brick": "lib/Zippy/Brick.rakumod",
+    "Zippy::Ball": "lib/Zippy/Ball.rakumod",
+    "Zippy::Paddle": "lib/Zippy/Paddle.rakumod",
+    "Zippy::Utils": "lib/Zippy/Utils.rakumod"
+  },
+  "resources": [
+    "config.toml",
+    "level/1.brk",
+    "level/1.png"
+  ],
+  "source-url": "",
+  "tags": [
+  ],
+  "test-depends": [
+  ],
+  "version": "0.0.1"
+}
