@@ -66,7 +66,7 @@ method update ( ) {
 				#say "brick ", $brick.rect;
 				@!dirty.push: $brick.rect;
 		    #say "before ", $ball.rect, $brick.rect;
-        $ball.reflect( :origin );
+        $ball.reflect( :over-x );
 		    #say "after  ", $ball.rect, $brick.rect;
 				$!level.brick[$brick.x][$brick.y] = Empty;
 			} );
