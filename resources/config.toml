@@ -1,0 +1,21 @@
+[window]
+width			 = 1920
+height		 = 1080
+#fullscreen = true
+
+[inputs]
+mouse      = true
+keyboard   = true
+
+[level]
+brick-width  = 20
+brick-height = 20
+
+[ball]
+radius  = 16
+speed   = 8
+
+[paddle]
+width  = 100
+height = 16
+speed  = 16

@@ -1,27 +1,38 @@
-use Pop::Config;
-use Pop::Point :operators;
-
-use Zippy::Utils;
-
-my \screen-width  = Pop::Config.get( 'window' ).<width>;
-my \screen-height = Pop::Config.get( 'window' ).<height>;
-my \ball-radius   = Pop::Config.get( 'ball'   ).<radius>;
+use Zippy::Config ( :ball );
+use Zippy::SDL ( :rect :point );
 
 unit class Zippy::Ball;
 
-has Pop::Point $.xy handles < x y > .= new: screen-width / 2, screen-height - ball-radius - 100;
+has SDL_Point $!xy;
+has SDL_Point $!wh;
+has SDL_Point $.speed handles <reflect>;
 
-has Pop::Point $.speed  .= new: 7;
+has SDL_Rect $.rect handles <x y w h>;
 
-has Int $.radius = ball-radius;
+has $.texture;
 
-has $.color     = @COLORS.pick;
-has Bool $.fill = True;
+#multi method move  ( ) { $!rect.shift: $!speed }
 
 method move ( ) {
 
-	$!speed *= ( -1,  1 ) unless 0 ≤ $!xy.x ≤ screen-width;
-	$!speed *= (  1, -1 ) unless 0 ≤ $!xy.y ≤ screen-height;
-	$!xy -= $!speed;
+	$!speed.reflect( :over-y ) unless $!rect.w ≤ $!rect.x ≤ window-width  - $!rect.w;
+	$!speed.reflect( :over-x ) unless $!rect.h ≤ $!rect.y ≤ window-height - $!rect.h;
+  $!rect.shift: $!speed 
+
+}
+
+
+multi method size-up   ( ) { $!rect.resize:      $!speed }
+multi method size-down ( ) { $!rect.resize: -1 * $!speed }
+
+submethod BUILD( SDL_Point :$xy, SDL_Point :$wh, SDL_Point :$speed, :$texture ) {
+
+	$!xy    = $xy;
+  $!wh    = SDL_Point.new: ball-config<radius>,   ball-config<radius>; 
+  $!speed = SDL_Point.new: 2, ball-config<speed>; 
+
+  $!rect  = SDL_Rect.new: $!xy.x, $!xy.y, $!wh.x, $!wh.y;
+
+	$!texture = $texture;
 
 }

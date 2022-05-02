@@ -3,3 +3,4 @@
 use Zippy;
 
 Zippy.new.run;
+#Zippy.new;

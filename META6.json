@@ -6,7 +6,6 @@
   "build-depends": [
   ],
   "depends": [
-    "Pop"
   ],
   "description": "Zippy Game",
   "license": "Artistic-2.0",
@@ -14,16 +13,27 @@
   "perl": "6.d",
   "provides": {
     "Zippy": "lib/Zippy.rakumod",
-    "Zippy::Level": "lib/Zippy/Level.rakumod",
-    "Zippy::Brick": "lib/Zippy/Brick.rakumod",
-    "Zippy::Ball": "lib/Zippy/Ball.rakumod",
+    "Zippy::Level":  "lib/Zippy/Level.rakumod",
+    "Zippy::Brick":  "lib/Zippy/Brick.rakumod",
+    "Zippy::Ball":   "lib/Zippy/Ball.rakumod",
     "Zippy::Paddle": "lib/Zippy/Paddle.rakumod",
-    "Zippy::Utils": "lib/Zippy/Utils.rakumod"
+    "Zippy::SDL":    "lib/Zippy/SDL.rakumod",
+    "Zippy::Config": "lib/Zippy/Config.rakumod",
+    "Zippy::Input": "lib/Zippy/Input.rakumod"
   },
   "resources": [
     "config.toml",
-    "level/1.brk",
-    "level/1.png"
+    "level/Intro.brk",
+    "level/Intro.png",
+    "level/Intro.jpg",
+    "paddle.png",
+    "ball1.png",
+    "ball2.png",
+    "ball3.png",
+    "ball4.png",
+    "ball5.png",
+    "ball6.png",
+    "ball7.png"
   ],
   "source-url": "",
   "tags": [
