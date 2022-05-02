@@ -1,76 +1,132 @@
-use Pop;
-use Pop::Config;
+
 use Pop::Point :operators;
+use Pop::Rect;
 use Pop::Texture;
 use Pop::Textures;
-
+use Pop::Inputs;
+use Pop::Entities;
+use Pop::Graphics;
 
 use Zippy::Utils;
-use Zippy::Level;
-use Zippy::Brick;
-use Zippy::Ball;
-use Zippy::Paddle;
 
 
 unit class Zippy;
 
-
-has Int $!screen-width;
-has Int $!screen-height;
-
-has Zippy::Level $!level;
-
-has Zippy::Brick @!brick;
-has Zippy::Ball  @!ball;
-
-has Zippy::Paddle $!paddle;
+constant SCREEN-WIDTH  is export = 900;
+constant SCREEN-HEIGHT is export = 700;
+constant BRICK-WIDTH   is export = 14;
+constant BRICK-HEIGHT  is export = 14;
+constant PADDLE-WIDTH  is export = 100;
+constant PADDLE-HEIGHT is export = 7;
+constant BALL-RADIUS   is export = 7;
 
 
-method run ( ) {
+class Brick  is export {
+  has Bool $.breakable = True;
+}
 
-	Pop.key-released: -> $_, $ { when 'ESCAPE' { Pop.stop } }
+class Ball is export {
+  has Int $.radius = BALL-RADIUS;
 
-	Pop.update: {
+  has Pop::Point $.speed is rw .= new: 7, 7;
+}
 
-		if    Pop::Inputs.keyboard: 'LEFT'  { $!paddle.move: 'LEFT'  }
-		elsif Pop::Inputs.keyboard: 'RIGHT' { $!paddle.move: 'RIGHT' }
+class Paddle is export {
+  has Pop::Point $.speed is rw .= new: 7, 0;
+}
 
-    @!ball.map( -> $ball { $ball.move } );
+
+class Room {
+	has $.x = 0;
+	has $.y = 0;
+	has Pop::Texture $.bg;
+	has Bool         $.is-title = False;
+
+  submethod TWEAK ( ) {
+   
+    $!bg = Pop::Textures.load( %?RESOURCES<room/1.png> );
+
+  }
+}
+
+my Room  $room;
+
+our sub term:<room> is export { $room }
+
+sub load-room ( $x, $y --> Nil ) is export {
+
+
+  Pop::Entities.clear;
+
+  create-bricks;
+  create-ball;
+  create-paddle;
+
+
+
+
+  my Pop::Texture $bg;
+
+	given Pop::Graphics {
+		.offset .= zero;
+
+		unless $bg = Pop::Textures.get('level') {
+			$bg = Pop::Textures.create: ( SCREEN-WIDTH, SCREEN-HEIGHT ), 'level';
+			$bg.blend-mode: 'blend';
+		}
+
+		.set-target: $bg;
+		LEAVE .reset-target;
+
+		.clear: 0, 0, 0, 0;
 
 	}
 
-	Pop.render: {
+  $room = Room.new: :$x :$y :$bg
 
-    Pop::Graphics.clear;
+}
 
-		Pop::Graphics.draw: $!level.bg, Pop::Point.zero;
+sub create-bricks ( ) {
 
-		$!level.brick.map( -> $brick { Pop::Graphics.rectangle: $brick.xy, $brick.xy + $brick.wh, $brick.color, fill => $brick.fill } );
+	for ( 0, * + BRICK-WIDTH ... 490 ) X ( 0, * + BRICK-WIDTH ... 490 ) -> ( $x, $y ) {
 
-		@!ball.map( -> $ball { Pop::Graphics.circle: $ball.xy, $ball.radius, $ball.color, fill => $ball.fill } );
+		my Pop::Point $xy     .= new: $x, $y; 
+		my Pop::Point $wh     .= new: BRICK-WIDTH, BRICK-HEIGHT; 
+		my Pop::Rect  $hitbox .= new: :$xy, :$wh;
 
-		Pop::Graphics.rectangle: $!paddle.xy, $!paddle.xy + $!paddle.wh, $!paddle.color, fill => $!paddle.fill;
-		
+		Pop::Entities.create: Brick.new, Position.new( :$xy ), Body.new( :$hitbox ), Renderable.new;
+
 	}
+}
 
-	Pop.run :30fps;
+sub create-ball ( ) {
+
+  my Pop::Point $xy     .= new: SCREEN-WIDTH / 2, SCREEN-HEIGHT - BALL-RADIUS - 100; 
+  my Pop::Point $wh     .= new: BALL-RADIUS * 2, BALL-RADIUS * 2;
+	my Pop::Rect  $hitbox .= new: :$xy, :$wh;
+  my Pop::Point $delta  .= new: 1;
+
+	Pop::Entities.create:
+    Ball.new,
+    Position.new( :$xy ),
+    Body.new( :$hitbox ),
+    Motion.new( :$delta ),
+    Renderable.new( :fill );
 
 }
 
-method !load( Int :$level = 1 ) {
+sub create-paddle ( ) {
 
-  Zippy::Level.new: 1;
+  my Pop::Point $xy     .= new: ( SCREEN-WIDTH - PADDLE-WIDTH ) / 2, SCREEN-HEIGHT - 100; 
+  my Pop::Point $wh     .= new: PADDLE-WIDTH,      PADDLE-HEIGHT;
+	my Pop::Rect  $hitbox .= new: :$xy, :$wh;
+  my Pop::Point $delta  .= new: 1;
+
+	Pop::Entities.create:
+		Paddle.new,
+		Position.new( :$xy ),
+		Motion.new( :$delta ),
+		Body.new( :$hitbox ),
+		Renderable.new( :fill );
 
 }
-
-submethod BUILD ( ) {
-
-	Pop.new: |Pop::Config.get( 'window' );
-
-  $!level = self!load: :level<1>;
-
-  $!paddle = Paddle.new;
-
-  @!ball.push: Zippy::Ball.new;
-}
-

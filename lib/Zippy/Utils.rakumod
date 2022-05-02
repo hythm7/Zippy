@@ -1,4 +1,8 @@
+use Pop::Point :operators;
+use Pop::Rect;
+
 unit module Zippy::Utils;
+
 
 our @COLORS is export = (
     # R     G     B
@@ -19,3 +23,44 @@ our @COLORS is export = (
     [ 0xFF, 0x77, 0xA8 ], # 14 Pink
     [ 0xFF, 0xCC, 0xAA ], # 15 Light peach
 );
+
+
+role Position   is export { has Pop::Point $.xy     is rw handles < x y > .= zero         }
+
+role Renderable is export {
+  has $.color     = @COLORS.pick;
+  has Bool $.fill = False;
+}
+
+role Body       is export {
+
+	has Bool      $.collideable is rw  = True;
+	has Pop::Rect $.hitbox      is rw .= new: 0 
+
+}
+
+role Motion is export {
+  has Pop::Point $.delta is rw .= new: 0, 0
+}
+
+#role Body is export {
+#
+#  has Pop::Rect  $.hitbox                               .= new: 0;
+#  has Bool       $.solid          is rw                  = True;
+#  has Bool       $.collideable    is rw                  = True;
+# 
+#  method check ( |c --> Bool ) { so $.collide: |c }
+#
+#  method collide ( $type where * !~~ Body, $x = 0, $y = 0 ) {
+#
+#    my $hitbox = $!hitbox.translate: self.xy.add( $x, $y );
+#
+#    Pop::Entities.view(Body, $type).each: -> $e, $_, $ {
+#      next if $_ === self || !.collideable;
+#      return $e if .hitbox.translate(.xy).collide: $hitbox;
+#    }
+#    Nil;
+#  }
+#}
+#
+#

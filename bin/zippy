@@ -1,5 +1,80 @@
 #!/usr/bin/env raku
 
+use Pop;
+use Pop::Point :operators;
+use Pop::Graphics;
+use Pop::Entities;
+
+use Zippy::Utils;
 use Zippy;
 
-Zippy.new.run;
+Pop.new: width => SCREEN-WIDTH, height => SCREEN-HEIGHT, :fullscreen, :title<Zippy>;
+
+load-room( 0, 0 );
+
+Pop.key-released: -> $_, $ { when 'ESCAPE' { Pop.stop } }
+
+Pop.update: {
+
+	Pop::Entities.view( Paddle, Position, Motion, Body ).each: -> $paddle, $position, $motion, $body {
+
+		if Pop::Inputs.keyboard: 'LEFT'  {
+      $position.xy -= $paddle.speed * $motion.delta;
+      $body.hitbox .= translate: $position.xy, :absolute
+    }
+		elsif Pop::Inputs.keyboard: 'RIGHT' {
+      $position.xy += $paddle.speed * $motion.delta;
+      $body.hitbox .= translate: $position.xy, :absolute
+    }
+
+	}
+
+	Pop::Entities.view( Ball, Position, Motion, Body ).each: -> $ball, $position, $motion, $body {
+
+		$motion.delta *= ( -1,  1 ) unless 0 ≤ $position.x ≤ SCREEN-WIDTH;
+		$motion.delta *= (  1, -1 ) unless 0 ≤ $position.y ≤ SCREEN-HEIGHT;
+
+    $position.xy -= $ball.speed * $motion.delta;
+
+  }
+
+}
+
+Pop.render: {
+
+  Pop::Graphics.clear;
+
+	Pop::Graphics.draw: room.bg, ( 0, 0 );
+
+	Pop::Entities.view( Brick, Body, Renderable ).each: -> $brick, $body, $renderable {
+
+	  Pop::Graphics.rectangle: $body.hitbox, $renderable.color, fill => $renderable.fill;
+
+	}
+
+	Pop::Entities.view( Ball, Position, Renderable ).each: -> $ball, $position, $renderable {
+
+	  Pop::Graphics.circle: $position.xy, $ball.radius, $renderable.color, fill => $renderable.fill;
+
+	}
+
+	Pop::Entities.view( Paddle, Body, Renderable ).each: -> $paddle, $body, $renderable {
+
+	  Pop::Graphics.rectangle: $body.hitbox, $renderable.color, fill => $renderable.fill;
+
+	}
+
+#	Pop::Entities.view( Ball ).each: -> $ball {
+#
+#
+#	}
+#
+#	Pop::Entities.view( Paddle ).each: -> $paddle {
+#
+#	  Pop::Graphics.rectangle: :fill, $paddle.hitbox, $paddle.color;
+#
+#  }
+}
+
+
+Pop.run :30fps;
